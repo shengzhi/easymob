@@ -11,6 +11,7 @@ import (
 	"log"
 	"mime/multipart"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
 	"strings"
 	"time"
@@ -106,6 +107,9 @@ func (c *Client) httpcall(uri, method string, request, response interface{}, nee
 	if needToken {
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.tokenValue()))
 	}
+
+	reqdata, _ := httputil.DumpRequest(req, true)
+	fmt.Println(string(reqdata))
 	res, err := c.httpClient.Do(req)
 	if res != nil {
 		defer res.Body.Close()
@@ -115,7 +119,7 @@ func (c *Client) httpcall(uri, method string, request, response interface{}, nee
 	}
 	if res.StatusCode != 200 {
 		data, _ := ioutil.ReadAll(res.Body)
-		return fmt.Errorf("%s", string(data))
+		return fmt.Errorf("Code:%d,Body:%s", res.StatusCode, string(data))
 	}
 	return json.NewDecoder(res.Body).Decode(response)
 }

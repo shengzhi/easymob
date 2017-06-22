@@ -3,6 +3,7 @@
 package easymob
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"time"
@@ -19,7 +20,7 @@ const (
 
 // Message 消息
 type Message struct {
-	TargetType TargetType  `json:"target_typess"`
+	TargetType TargetType  `json:"target_type"`
 	Target     []string    `json:"target"`
 	From       string      `json:"from,omitempty"`
 	Content    interface{} `json:"msg"`
@@ -80,4 +81,23 @@ func (c *Client) CreateImgMessage(file io.Reader) (msg ImgMessage, err error) {
 		Secret:   entity.Secret,
 	}
 	return
+}
+
+// DownloadMessages 下载聊天记录
+func (c *Client) DownloadMessages(t time.Time) ([]string, error) {
+	path := c.makePath("chatmessages", []string{t.Format("2006010215")}, nil)
+	var reply commonReply
+	err := c.httpcall(path, "GET", nil, &reply, true)
+	if err != nil {
+		return []string{}, err
+	}
+	var result []struct {
+		URL string `json:"url"`
+	}
+	err = json.Unmarshal(reply.Data, &result)
+	var files []string
+	for _, res := range result {
+		files = append(files, res.URL)
+	}
+	return files, err
 }
