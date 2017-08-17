@@ -11,7 +11,6 @@ import (
 	"log"
 	"mime/multipart"
 	"net/http"
-	"net/http/httputil"
 	"net/url"
 	"strings"
 	"time"
@@ -108,8 +107,8 @@ func (c *Client) httpcall(uri, method string, request, response interface{}, nee
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.tokenValue()))
 	}
 
-	reqdata, _ := httputil.DumpRequest(req, true)
-	fmt.Println(string(reqdata))
+	// reqdata, _ := httputil.DumpRequest(req, true)
+	// fmt.Println(string(reqdata))
 	res, err := c.httpClient.Do(req)
 	if res != nil {
 		defer res.Body.Close()
